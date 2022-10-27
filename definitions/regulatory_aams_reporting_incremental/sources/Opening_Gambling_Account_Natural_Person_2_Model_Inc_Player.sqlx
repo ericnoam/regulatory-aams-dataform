@@ -1,0 +1,43 @@
+config {
+    type: "incremental",
+    description: "Incremental table used to easily obtain the players that operate under the AAMS regulations",
+    columns: {
+        Id: "LeoVegas Account Code",
+        AamsPlayerId: "Player id on AAMS",
+        RhinoPlayerId: "Is renamed as Player_UID because that's what it is",
+        FiscalCode: "Tax Code Number under AAMS jurisdiction",
+        Created: "Timestamp when the account was created",
+        _ts_ms_as_timestamp: "Timestamp for this row's operation"
+    },
+    bigquery: {
+        partitionBy: "DATE(_ts_ms_as_timestamp)",
+        clusterBy: ["AamsPlayerId"]
+    },
+    /*assertions: {
+        uniqueKey: ["AamsPlayerId"],
+        rowConditions: [
+            '_ts_ms_as_timestamp >= "2022-07-26"'
+        ]
+    }*/
+}
+pre_operations {
+    declare event_timestamp_checkpoint default (
+        ${
+            when(incremental(),
+                `select max(_ts_ms_as_timestamp) from ${self()}`,
+                `select timestamp("2022-07-26")`
+            )
+        }
+    )
+}
+
+SELECT Id
+     , AamsPlayerId
+     , RhinoPlayerId
+     , FiscalCode
+     , Created
+     , _ts_ms_as_timestamp
+FROM ${ref('aamsplayer_Player_Raw_View')}
+WHERE _ts_ms_as_timestamp > event_timestamp_checkpoint
+AND STATE = 'VALIDATED'
+AND AamsStatus = 'OPEN'

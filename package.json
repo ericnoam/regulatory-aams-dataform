@@ -1,0 +1,11 @@
+{
+    "dependencies": {
+        "@dataform/core": "1.22.0"
+    },
+    "scripts": {
+        "dataform": "dataform"
+    },
+    "devDependencies": {
+        "@dataform/cli": "2.0.0-beta.1"
+    }
+}

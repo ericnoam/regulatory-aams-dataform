@@ -1,0 +1,20 @@
+config {
+    type: 'table',
+    schema: 'regulatory_aams_reporting_dataform',
+    bigquery: {
+        partitionBy: "DATE(_ts_ms_as_timestamp)",
+        clusterBy: ["Id"],
+        requirePartitionFilter: true
+    },
+    disabled: true
+}
+
+SELECT
+    DISTINCT (Id)
+           , AamsPlayerId
+           , RhinoPlayerId as Player_UID
+           , _ts_ms_as_timestamp
+FROM `leo-dev-platform.manges_playground.aamsplayer_Player_Raw_View`
+    WHERE DATE(_ts_ms_as_timestamp) >= "2022-01-01"
+AND STATE = 'VALIDATED'
+AND AamsStatus = 'OPEN'

@@ -1,0 +1,70 @@
+config {
+  type: "test",
+  dataset: "model_payment"
+}
+
+input "payment_Payment_Raw_View" {
+SELECT 10021                AS Method_ID,
+       "2022-07-02"         AS _ts_ms_as_timestamp,
+       "APPROVED"           AS State,
+       "CREDITED"           AS Status,
+       "123R"               AS Regulatory_ID,
+       "123P"               AS Player_UID,
+       20                   AS Amount,
+       "DEPOSIT"            AS Type
+UNION ALL
+SELECT 1303                 AS Method_ID,
+       "2022-07-12"         AS _ts_ms_as_timestamp,
+       "APPROVED"           AS State,
+       "CREDITED"           AS Status,
+       "234R"               AS Regulatory_ID,
+       "234P"               AS Player_UID,
+       10                   AS Amount,
+       "DEPOSIT"            AS Type
+UNION ALL
+SELECT 7                    AS Method_ID,
+       "2022-07-05"         AS _ts_ms_as_timestamp,
+       "APPROVED"           AS State,
+       "CREDITED"           AS Status,
+       "345R"               AS Regulatory_ID,
+       "345P"               AS Player_UID,
+       15                   AS Amount,
+       "DEPOSIT"            AS Type
+UNION ALL
+SELECT 10021                AS Method_ID,
+       "2022-07-21"         AS _ts_ms_as_timestamp,
+       "APPROVED"           AS State,
+       "CREDITED"           AS Status,
+       "456R"               AS Regulatory_ID,
+       "456P"               AS Player_UID,
+       24                   AS Amount,
+       "DEPOSIT"            AS Type
+}
+
+SELECT "123P"               AS Player_UID,
+       "123R"               AS Regulatory_ID,
+       2                    AS Method_ID,
+       20                   AS Amount,
+       1                    AS Type,
+       "2022-07-02"         AS _ts_ms_as_timestamp
+        UNION ALL
+SELECT "234P"               AS Player_UID,
+       "234R"               AS Regulatory_ID,
+       13                   AS Method_ID,
+       10                   AS Amount,
+       1                    AS Type,
+       "2022-07-12"         AS _ts_ms_as_timestamp
+       UNION ALL
+SELECT "345P"               AS Player_UID,
+       "345R"               AS Regulatory_ID,
+       7                    AS Method_ID,
+       15                   AS Amount,
+       1                    AS Type,
+       "2022-07-05"         AS _ts_ms_as_timestamp,
+UNION ALL
+SELECT "456P"               AS Player_UID,
+       "456R"               AS Regulatory_ID,
+       2                    AS Method_ID,
+       24                   AS Amount,
+       1                    AS Type,
+       "2022-07-21"         AS _ts_ms_as_timestamp

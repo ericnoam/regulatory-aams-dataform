@@ -1,0 +1,18 @@
+config {
+    type: 'table',
+    schema: 'regulatory_aams_reporting_dataform',
+    bigquery: {
+        partitionBy: "DATE(_ts_ms_as_timestamp)",
+        clusterBy: ["Account_ID"],
+        requirePartitionFilter: true
+    },
+    disabled: true
+}
+
+SELECT
+    Account_ID
+     , PlayerTransaction_ID
+     , Timestamp as Transaction_TimeStamp
+     , _ts_ms_as_timestamp
+FROM `leo-dev-platform.manges_playground.account_AccountTransaction_Raw_View`
+WHERE DATE(_ts_ms_as_timestamp) >= "2022-01-01"

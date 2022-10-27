@@ -1,0 +1,23 @@
+config {
+    type: 'view',
+    schema: 'regulatory_aams_reporting_dataform',
+    disabled: true
+}
+
+SELECT
+  "${dataform.projectConfig.vars.fsc_id}"                                           AS ID_FSC
+  , ${dataform.projectConfig.vars.network_id}                                       AS NETWORK_ID
+  , "${dataform.projectConfig.vars.cn_id}"                                          AS CN_ID
+  , mt.PlayerTransaction_ID                                                         AS Transaction_ID
+  , player.AamsPlayerId                                                             AS Account_Code
+  , player.FiscalCode                                                               AS Account_Holder
+  , player.Created                                                                  AS Created_At
+  , 1                                                                               AS Limits_Number
+  , limits.Limit_Type
+  , limits.Limit_Value                                                              AS Limit_Amount
+  , limits.Active_From                                                              AS Limit_Active_From
+FROM ${ref('Opening_Gambling_Account_Natural_Person_2_Model_Player')} player
+JOIN ${ref('Opening_Gambling_Account_Natural_Person_2_Model_Limit')}                AS limits
+    ON player.RhinoPlayerId = limits.Player_UID
+JOIN ${ref('Opening_Gambling_Account_Natural_Person_2_Model_Account_Transaction')}  AS mt
+    ON player.Id = mt.Account_ID

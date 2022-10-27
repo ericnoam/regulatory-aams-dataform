@@ -1,0 +1,23 @@
+config {
+    type: 'view',
+    schema: 'regulatory_aams_reporting_dataform',
+    disabled: true
+}
+
+SELECT
+    "${dataform.projectConfig.vars.fsc_id}" as ID_FSC
+     , ${dataform.projectConfig.vars.network_id} as NETWORK_ID
+     , "${dataform.projectConfig.vars.cn_id}" as CN_ID
+     , pay.Regulatory_ID as Transaction_ID
+     , ${dataform.projectConfig.vars.account_network_id} as Account_NETWORK_ID
+     , ams.AamsPlayerId as Account_Code
+     , pay.Method_ID as Payment_Method
+     , pay.Type as Transaction_Reason
+     , pay.Amount as Transaction_Amount
+     , act.BalanceAfter as Balance_Amount
+     , act._ts_ms_as_timestamp as Data_Ora_Saldo
+FROM ${ref('Gambling_Account_Transactions_Model_Account')} ams
+         JOIN ${ref('model_payment')} pay
+              ON ams.Player_UID = pay.Player_UID
+         JOIN ${ref('Gambling_Account_Transactions_Model_Account_Transaction')} act
+              ON ams.Id = act.Account_Id

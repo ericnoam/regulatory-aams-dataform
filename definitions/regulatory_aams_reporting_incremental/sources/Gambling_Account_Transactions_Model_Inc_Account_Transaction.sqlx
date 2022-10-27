@@ -1,0 +1,36 @@
+config {
+    type: "incremental",
+    description: "Incremental account transactions used to obtain the account balance",
+    columns: {
+        Account_ID: "LeoVegas Account Code",
+        BalanceAfter: "Account balance after a given timestamp",
+        _ts_ms_as_timestamp: "Timestamp when the account was created"
+    },
+    bigquery: {
+        partitionBy: "DATE(_ts_ms_as_timestamp)",
+        clusterBy: ["Account_ID"]
+    },
+    /*assertions: {
+        rowConditions: [
+            "_ts_ms_as_timestamp >= '2022-07-26'"
+        ]
+    }*/
+}
+
+pre_operations {
+    declare event_timestamp_checkpoint default (
+        ${
+            when(incremental(),
+                `select max(_ts_ms_as_timestamp) from ${self()}`,
+                `select timestamp("2022-07-26")`
+            )
+        }
+    )
+}
+
+SELECT
+  Account_ID,
+  BalanceAfter,
+  _ts_ms_as_timestamp
+FROM ${ref('account_AccountTransaction_Raw_View')}
+WHERE _ts_ms_as_timestamp > event_timestamp_checkpoint

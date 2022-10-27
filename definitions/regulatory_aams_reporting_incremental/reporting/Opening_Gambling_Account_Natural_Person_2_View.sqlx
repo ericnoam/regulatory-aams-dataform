@@ -1,0 +1,34 @@
+config {
+    type: 'view',
+    description: "Incremental aggregate view for the for the Opening of Gambling Account for Natural Person 2",
+    columns: {
+        ID_FSC: "Unique identifier of the FSC that is handling the transaction",
+        NETWORK_ID: "Unique identifier of the CN’s Sales Network that is handling the transaction (see network code table)",
+        CN_ID: "Uniqueidentifier of the CN that is handling the transaction",
+        Transaction_ID: "Unique identifier of the transaction (at CN level)",
+        Account_Code: "Unique Gambling Account Code for the CN",
+        Account_Holder: "Identifier data of Gambling Account holder",
+        Limit_Type: "Limit type (see limit type table)",
+        Limit_Amount: "Amount (in euro cents)",
+        Limit_Active_From: "Timestamp since when the limit is active",
+        _ts_ms_as_timestamp: "Timestamp of balance"
+    }
+}
+
+SELECT "${dataform.projectConfig.vars.fsc_id}"   AS ID_FSC
+     , ${dataform.projectConfig.vars.network_id} AS NETWORK_ID
+     , "${dataform.projectConfig.vars.cn_id}"    AS CN_ID
+     , mt.PlayerTransaction_ID                   AS Transaction_ID
+     , player.AamsPlayerId                       AS Account_Code
+     , player.FiscalCode                         AS Account_Holder
+     , player.Created                            AS Created_At
+     , 1                                         AS Limits_Number
+     , limits.Limit_Type
+     , limits.Limit_Value                        AS Limit_Amount
+     , limits.Active_From                        AS Limit_Active_From
+     , limits._ts_ms_as_timestamp
+FROM ${ref('Opening_Gambling_Account_Natural_Person_2_Model_Inc_Player')} player
+         JOIN ${ref('Opening_Gambling_Account_Natural_Person_2_Model_Inc_Limit')} AS limits
+              ON player.RhinoPlayerId = limits.Player_UID
+         JOIN ${ref('Opening_Gambling_Account_Natural_Person_2_Model_Inc_Account_Transaction')} AS mt
+              ON player.Id = mt.Account_ID

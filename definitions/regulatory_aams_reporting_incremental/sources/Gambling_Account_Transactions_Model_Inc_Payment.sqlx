@@ -1,0 +1,46 @@
+config {
+    type: "incremental",
+    description: "Payment data by Player_UID",
+    columns: {
+        Player_UID: "LeoVegas Unique Player Id",
+        Regulatory_ID: "Id the regulator has assigned to this player",
+        Method_ID: "AAMS code for the payment method",
+        Amount: "Payment amount",
+        Type: "Code to distinguish whether this is a credit or a debit transaction",
+        _ts_ms_as_timestamp: "Timestamp when the account was created"
+    },
+    bigquery: {
+        partitionBy: "DATE(_ts_ms_as_timestamp)",
+        clusterBy: ["Player_UID"]
+    },
+    /*assertions: {
+        uniqueKey: ["Player_UID", "Regulatory_ID"],
+        rowConditions: [
+            "_ts_ms_as_timestamp >= '2022-07-26'"
+        ]
+    }*/
+}
+
+pre_operations {
+    declare event_timestamp_checkpoint default (
+        ${
+            when(incremental(),
+                `select max(_ts_ms_as_timestamp) from ${self()}`,
+                `select timestamp("2022-07-26")`
+            )
+        }
+    )
+}
+
+SELECT
+  Player_UID
+  , Regulatory_ID
+  , (SELECT case when Method_ID = 10021 THEN 2 WHEN Method_ID = 1303 THEN 13 ELSE Method_ID END) as Method_ID
+  , Amount
+  , (SELECT case when Type = 'DEPOSIT' THEN 1 ELSE 3 END) as Type
+  , _ts_ms_as_timestamp
+FROM ${ref('payment_Payment_Raw_View')}
+WHERE _ts_ms_as_timestamp > event_timestamp_checkpoint
+AND State = 'APPROVED'
+AND Status = 'CREDITED'
+AND Regulatory_ID is not null

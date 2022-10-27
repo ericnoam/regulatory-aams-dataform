@@ -1,0 +1,26 @@
+config {
+    type: 'table',
+    schema: 'regulatory_aams_reporting_dataform',
+    bigquery: {
+        partitionBy: "DATE(_ts_ms_as_timestamp)",
+        clusterBy: ["Player_UID"],
+        requirePartitionFilter: true
+    },
+    disabled: true
+}
+
+SELECT
+  Player_UID
+  , (
+      SELECT CASE
+          WHEN Period_Type = 'DAY' THEN 1
+          WHEN Period_Type = 'WEEK' THEN 2
+          ELSE 3
+      END
+    ) as Limit_Type
+  , Limit_Value
+  , Active_From
+  , _ts_ms_as_timestamp
+FROM `leo-dev-platform.manges_playground.responsiblegaming_Responsible_Gaming_Limit_Raw_View`
+WHERE DATE(_ts_ms_as_timestamp) >= "2022-01-01"
+AND Limit_Value is not null

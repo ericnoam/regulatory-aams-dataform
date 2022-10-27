@@ -1,0 +1,47 @@
+config {
+    type: "incremental",
+    description: "Player limits",
+    columns: {
+        Player_UID: "LeoVegas Player's Id",
+        Limit_Type: "Code for the limit's period",
+        Limit_Value: "Value for the limit",
+        Active_From: "Timestamp when the limit became active",
+        _ts_ms_as_timestamp: "Timestamp of this row's operation"
+    },
+    bigquery: {
+        partitionBy: "DATE(_ts_ms_as_timestamp)",
+        clusterBy: ["Player_UID"],
+    },
+    /*assertions: {
+        uniqueKey: ["Player_UID"],
+        rowConditions: [
+            '_ts_ms_as_timestamp >= "2022-07-26"',
+            'Limit_Type > 0 AND Limit_Type < 4'
+        ]
+    }*/
+}
+
+pre_operations {
+    declare event_timestamp_checkpoint default (
+        ${
+            when(incremental(),
+                `select max(_ts_ms_as_timestamp) from ${self()}`,
+                `select timestamp("2022-07-26")`
+            )
+        }
+    )
+}
+
+SELECT
+  Player_UID
+  , (SELECT CASE
+          WHEN Period_Type = 'DAY' THEN 1
+          WHEN Period_Type = 'WEEK' THEN 2
+          ELSE 3
+  END) as Limit_Type
+  , Limit_Value
+  , Active_From
+  , _ts_ms_as_timestamp
+FROM ${ref('responsiblegaming_Responsible_Gaming_Limit_Raw_View')}
+WHERE _ts_ms_as_timestamp > event_timestamp_checkpoint
+AND Limit_Value is not null

@@ -1,0 +1,13 @@
+{
+    "warehouse": "bigquery",
+    "defaultSchema": "regulatory_aams_rhino_core",
+    "assertionSchema": "dataform_rhino_assertions",
+    "defaultDatabase": "leo-dev-platform",
+    "useRunCache": false,
+    "vars": {
+        "fsc_id": "LVFSC123",
+        "cn_id": "LVCN123",
+        "network_id": "14",
+        "account_network_id": "14"
+    }
+}

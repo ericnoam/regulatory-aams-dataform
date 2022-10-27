@@ -1,0 +1,24 @@
+config {
+    type: "table",
+    schema: "regulatory_aams_reporting_dataform",
+    name: "model_payment",
+    bigquery: {
+        partitionBy: "DATE(_ts_ms_as_timestamp)",
+        clusterBy: ["Player_UID"],
+        requirePartitionFilter: true
+    },
+    /*disabled: true*/
+}
+
+SELECT
+    Player_UID
+     , Regulatory_ID
+     , (SELECT case when Method_ID = 10021 THEN 2 WHEN Method_ID = 1303 THEN 13 ELSE Method_ID END) as Method_ID
+     , Amount
+     , (SELECT case when Type = 'DEPOSIT' THEN 1 ELSE 3 END) as Type
+     , _ts_ms_as_timestamp
+FROM ${ref("payment_Payment_Raw_View")}
+    WHERE DATE(_ts_ms_as_timestamp) >= "2022-07-01"
+AND State = 'APPROVED'
+AND Status = 'CREDITED'
+AND Regulatory_ID is not null
